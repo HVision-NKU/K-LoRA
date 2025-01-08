@@ -104,7 +104,5 @@ python inference.py \
 ## Citation
 If you use this code or dataset, please cite the following paper:
 
-## Lincense
-
 ## Contact
 If you have any questions or suggestions, please feel free to open an issue or contact the authors at [ziheng.ouyang666@gmail.com](mailto:ziheng.ouyang666@gmail.com).
