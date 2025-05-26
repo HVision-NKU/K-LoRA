@@ -41,7 +41,7 @@ def parse_args():
         "--pattern",
         type=str,
         help="Pattern for the image generation",
-        default="s",
+        default="s*",
     )
     return parser.parse_args()
 
