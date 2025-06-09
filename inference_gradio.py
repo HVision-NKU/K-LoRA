@@ -42,7 +42,7 @@ if pattern == "s*":
     beta = alpha * 0.85
 else:
     alpha = 1.5
-    beta = alpha * 0.5
+    beta = 0.5
     
 sum_timesteps = 28000
 
