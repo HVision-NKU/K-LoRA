@@ -108,7 +108,7 @@ if pattern == "s*":
     beta = alpha * 0.85
 else:
     alpha = 1.5
-    beta = alpha * 0.5
+    beta = 0.5
 flux_diffuse_step = 28
 
 content_lora = record_content_loras[int(args.content_index)]
