@@ -3,6 +3,7 @@ from diffusers import DiffusionPipeline
 import torch
 import os
 from utils import insert_sd_klora_to_unet
+import random
 
 
 def parse_args():
@@ -66,13 +67,15 @@ pipe.unet = insert_sd_klora_to_unet(
 pipe.to(device, dtype=torch.float16)
 
 def run():
-    seeds = list(range(40))
-    seeds = [see for see in seeds]
-
+    seeds = [random.randint(1, 50000) for _ in range(40)]
+    seeds = [seed for seed in seeds]
+    # seeds= [12345]  # for exact comparison
+    
     for index, seed in enumerate(seeds):
         generator = torch.Generator(device=device).manual_seed(seed)
         image = pipe(prompt=args.prompt, generator=generator).images[0]
         output_path = os.path.join(args.output_folder, f"output_image_{index}.png")
+        os.makedirs(args.output_folder, exist_ok=True)
         image.save(output_path)
         print(output_path)
 

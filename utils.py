@@ -49,7 +49,7 @@ def get_lora_weights(
 
 
 def merge_lora_weights(
-    tensors: torch.Tensor, key: str, prefix: str = "unet.unet."
+    tensors: torch.Tensor, key: str, prefix: str = "unet."
 ) -> Dict[str, torch.Tensor]:
     """
     Args:
@@ -243,7 +243,15 @@ def insert_sd_klora_to_unet(
             "pattern": pattern,
         }
         # Set the `lora_layer` attribute of the attention-related matrices.
-        attn_module.to_q.set_lora_layer(
+        has_bias_q = attn_module.to_q.bias is not None
+        new_module_q = LoRACompatibleLinear(
+            in_features=attn_module.to_q.in_features,
+            out_features=attn_module.to_q.out_features,
+            bias=has_bias_q,
+            device=attn_module.to_q.weight.device,
+            dtype=attn_module.to_q.weight.dtype,
+        )
+        new_module_q.set_lora_layer(
             initialize_klora_layer(
                 **kwargs,
                 part="to_q",
@@ -251,7 +259,20 @@ def insert_sd_klora_to_unet(
                 out_features=attn_module.to_q.out_features,
             )
         )
-        attn_module.to_k.set_lora_layer(
+        new_module_q.weight.data.copy_(attn_module.to_q.weight.data)
+        if has_bias_q:
+            new_module_q.bias.data.copy_(attn_module.to_q.bias.data)
+        attn_module.to_q = new_module_q
+        
+        has_bias_k = attn_module.to_k.bias is not None
+        new_module_k = LoRACompatibleLinear(
+            in_features=attn_module.to_k.in_features,
+            out_features=attn_module.to_k.out_features,
+            bias=has_bias_k,
+            device=attn_module.to_k.weight.device,
+            dtype=attn_module.to_k.weight.dtype,
+        )
+        new_module_k.set_lora_layer(
             initialize_klora_layer(
                 **kwargs,
                 part="to_k",
@@ -259,7 +280,20 @@ def insert_sd_klora_to_unet(
                 out_features=attn_module.to_k.out_features,
             )
         )
-        attn_module.to_v.set_lora_layer(
+        new_module_k.weight.data.copy_(attn_module.to_k.weight.data)
+        if has_bias_k:
+            new_module_k.bias.data.copy_(attn_module.to_k.bias.data)
+        attn_module.to_k = new_module_k
+        
+        has_bias_v = attn_module.to_v.bias is not None
+        new_module_v = LoRACompatibleLinear(
+            in_features=attn_module.to_v.in_features,
+            out_features=attn_module.to_v.out_features,
+            bias=has_bias_v,
+            device=attn_module.to_v.weight.device,
+            dtype=attn_module.to_v.weight.dtype,
+        )
+        new_module_v.set_lora_layer(
             initialize_klora_layer(
                 **kwargs,
                 part="to_v",
@@ -267,7 +301,20 @@ def insert_sd_klora_to_unet(
                 out_features=attn_module.to_v.out_features,
             )
         )
-        attn_module.to_out[0].set_lora_layer(
+        new_module_v.weight.data.copy_(attn_module.to_v.weight.data)
+        if has_bias_v:
+            new_module_v.bias.data.copy_(attn_module.to_v.bias.data)
+        attn_module.to_v = new_module_v
+        
+        has_bias_out = attn_module.to_out[0].bias is not None
+        new_module_out = LoRACompatibleLinear(
+            in_features=attn_module.to_out[0].in_features,
+            out_features=attn_module.to_out[0].out_features,
+            bias=has_bias_out,
+            device=attn_module.to_out[0].weight.device,
+            dtype=attn_module.to_out[0].weight.dtype,
+        )
+        new_module_out.set_lora_layer(
             initialize_klora_layer(
                 **kwargs,
                 part="to_out.0",
@@ -275,6 +322,10 @@ def insert_sd_klora_to_unet(
                 out_features=attn_module.to_out[0].out_features,
             )
         )
+        new_module_out.weight.data.copy_(attn_module.to_out[0].weight.data)
+        if has_bias_out:
+            new_module_out.bias.data.copy_(attn_module.to_out[0].bias.data)
+        attn_module.to_out[0] = new_module_out
     return unet
 
 
